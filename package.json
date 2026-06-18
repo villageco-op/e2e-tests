@@ -1,0 +1,23 @@
+{
+  "name": "village-e2e-tests",
+  "version": "1.0.0",
+  "description": "End-to-End tests for Village Co-op Frontend and Backend",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:smoke": "playwright test tests/smoke.spec.ts",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:local": "node scripts/run-e2e-local.js",
+    "format": "prettier --write .",
+    "lint": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@types/node": "^22.0.0",
+    "dotenv": "^17.4.2",
+    "prettier": "^3.2.5",
+    "stripe": "^15.0.0",
+    "typescript": "^5.4.5"
+  }
+}

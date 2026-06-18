@@ -1,0 +1,76 @@
+name: Run Staging E2E Tests
+
+on:
+  repository_dispatch:
+    types: [staging-to-main-pr]
+
+jobs:
+  run-e2e:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.59.1-noble
+    
+    env:
+      PLAYWRIGHT_TEST_BASE_URL: ${{ secrets.TEST_BASE_URL }}
+      STAGING_API_URL: ${{ secrets.STAGING_API_URL }}
+      VERCEL_BYPASS_TOKEN: ${{ secrets.VERCEL_BYPASS_TOKEN }}
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+      NEON_ROLE_PASSWORD: ${{ secrets.NEON_ROLE_PASSWORD }}
+      NEON_DB_USER: ${{ secrets.NEON_DB_USER }}
+      NEON_DB_NAME: ${{ secrets.NEON_DB_NAME }}
+      STRIPE_TEST_SECRET_KEY: ${{ secrets.STRIPE_TEST_SECRET_KEY }}
+      E2E_RUN_ID: ${{ github.run_id }}
+
+    steps:
+      - name: Checkout E2E Tests Code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm & dependencies
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+
+      - name: Create Neon Branch
+        id: neon
+        run: |
+          BRANCH_NAME="e2e-run-${{ github.run_id }}"
+          
+          RESPONSE=$(curl -s -X POST "https://console.neon.tech/api/v2/projects/${NEON_PROJECT_ID}/branches" \
+            -H "Authorization: Bearer ${NEON_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d '{"branch": {"name": "'$BRANCH_NAME'"}, "endpoints": [{"type": "read_write"}]}')
+          
+          BRANCH_ID=$(echo $RESPONSE | jq -r '.branch.id')
+          DB_HOST=$(echo $RESPONSE | jq -r '.endpoints[0].host')
+          DB_URL="postgresql://${NEON_DB_USER}:${NEON_ROLE_PASSWORD}@${DB_HOST}/${NEON_DB_NAME}?sslmode=require"
+          
+          echo "branch_id=$BRANCH_ID" >> $GITHUB_OUTPUT
+          echo "E2E_NEON_DB_URL=$DB_URL" >> $GITHUB_ENV
+
+      - name: Run Playwright Tests
+        run: pnpm test
+
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Delete Neon Branch
+        if: always()
+        run: |
+          curl -s -X DELETE "https://console.neon.tech/api/v2/projects/${NEON_PROJECT_ID}/branches/${{ steps.neon.outputs.branch_id }}" \
+            -H "Authorization: Bearer ${NEON_API_KEY}"
+          echo "Deleted Neon Branch: ${{ steps.neon.outputs.branch_id }}"
+
+      - name: Cleanup Stripe Customers
+        if: always()
+        run: node ./scripts/stripe-cleanup.js
