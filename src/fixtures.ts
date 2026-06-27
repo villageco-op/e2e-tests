@@ -1,4 +1,4 @@
-import { test as base, Page } from '@playwright/test';
+import { test as base, expect, Page } from '@playwright/test';
 import { createAuthenticatedPage } from './utils/createAuthenticatedPage';
 
 export type MyTestOptions = {
@@ -6,9 +6,10 @@ export type MyTestOptions = {
   runId: string;
   generateTestEmail: (identifier?: string) => string;
   onboardedSellerPage: { page: Page; email: string };
-  onboardedBuyerPage: Page;
+  onboardedBuyerPage: { page: Page; email: string };
   sellerWithProducePage: { page: Page; email: string; produceId: string };
   newUnonboardedPage: Page;
+  userWithOrganizationPage: { page: Page; email: string; orgId: string; subdomain: string };
 };
 
 export const test = base.extend<MyTestOptions>({
@@ -72,7 +73,7 @@ export const test = base.extend<MyTestOptions>({
 
     const { page, context } = await createAuthenticatedPage(browser, request, baseURL, baseURLApi, email);
     
-    await use(page);
+    await use({ page, email });
 
     await page.close();
     await context.close();
@@ -91,6 +92,37 @@ export const test = base.extend<MyTestOptions>({
     const { page, context } = await createAuthenticatedPage(browser, request, baseURL, baseURLApi, email);
     
     await use(page);
+
+    await page.close();
+    await context.close();
+  },
+
+  userWithOrganizationPage: async ({ browser, request, baseURL, baseURLApi, generateTestEmail }, use) => {
+    const email = generateTestEmail(`org-owner-${Date.now()}`);
+    const subdomain = `test-org-${Date.now()}`;
+
+    await request.post(`${baseURLApi}/api/testing/seed-user`, {
+      data: {
+        email,
+        stripeOnboarded: false,
+        profile: { name: 'Org Admin', address: '789 Hub Way', city: 'Madison', state: 'WI', zip: '53703' }
+      }
+    });
+
+    const orgRes = await request.post(`${baseURLApi}/api/testing/seed-organization`, {
+      data: {
+        name: 'E2E Test Organization',
+        subdomain,
+        type: 'pantry',
+      }
+    });
+    expect(orgRes.ok()).toBeTruthy();
+    const orgBody = await orgRes.json();
+    const orgId = orgBody.organization.id;
+
+    const { page, context } = await createAuthenticatedPage(browser, request, baseURL, baseURLApi, email);
+
+    await use({ page, email, orgId, subdomain });
 
     await page.close();
     await context.close();

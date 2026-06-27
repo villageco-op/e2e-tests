@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test';
 import { test } from '../fixtures';
+import { seedInvite } from '@/utils/seedInvite';
 
 test.describe('Critical User Flows', () => {
 
@@ -8,6 +9,9 @@ test.describe('Critical User Flows', () => {
 
     await page.goto('/onboarding');
     await expect(page).toHaveURL(/.*\/onboarding/);
+
+    const individualBtn = page.getByRole('button', { name: /Individual/i });
+    await individualBtn.click();
     
     await page.getByLabel(/Real Name/i).fill('Jane Doe');
     await page.getByLabel(/Street Address/i).fill('123 Farm Lane');
@@ -35,6 +39,61 @@ test.describe('Critical User Flows', () => {
     const stripeBtn = page.getByRole('button', { name: /Complete Stripe Onboarding/i });
     await expect(stripeBtn).toBeVisible();
     await expect(stripeBtn).toBeEnabled();
+  });
+
+  test('Create organization onboarding', async ({ newUnonboardedPage }) => {
+    const page = newUnonboardedPage;
+
+    await page.goto('/onboarding'); 
+    const orgBtn = page.getByRole('button', { name: /Organization/i });
+    await orgBtn.click();
+
+    const pantryBtn = page.getByRole('button', { name: /Food Pantry/i });
+    await pantryBtn.click();
+
+    await page.getByRole('button', { name: /Continue/i }).click();
+
+    await page.getByLabel(/Organization Name/i).fill('Gary Food Network');
+    await page.getByLabel(/Custom Subdomain/i).fill('gary-network');
+    await page.getByLabel(/Street Address/i).fill('401 Broadway');
+    await page.getByLabel(/ZIP Code/i).fill('46402');
+
+    await expect(page.getByText(/Subdomain is available!/i)).toBeVisible();
+
+    await page.getByRole('button', { name: /Create Organization/i }).click();
+
+    await page.getByLabel(/Member Email Address/i).fill('partner@garyfood.org');
+    await page.getByRole('button', { name: /Invite/i }).click();
+
+    await expect(page.getByRole('cell', { name: 'partner@garyfood.org' })).toBeVisible();
+    
+    await page.getByRole('button', { name: /Finish & Go to Dashboard/i }).click();
+    await expect(page).toHaveURL(/.*\/dashboard/);
+  });
+
+  test('Accept organization invitation', async ({ userWithOrganizationPage, onboardedBuyerPage, baseURLApi, request }) => {
+    const { orgId } = userWithOrganizationPage;
+    const { page, email } = onboardedBuyerPage;
+
+    const inviteRecord = await seedInvite(request, baseURLApi, {
+      email: email,
+      orgId: orgId,
+      role: 'member'
+    });
+
+    await page.goto(`/verify-invite?org=${orgId}&code=${inviteRecord.code}&email=${email}`);
+
+    await expect(page.getByRole('heading', { name: /Join E2E Test Organization/i })).toBeVisible();
+
+    const emailInput = page.getByLabel(/Email Address/i);
+    await expect(emailInput).toHaveValue(email);
+    await expect(emailInput).toBeDisabled();
+
+    await expect(page.getByLabel(/Invitation Code/i)).toHaveValue(inviteRecord.code);
+
+    await page.getByRole('button', { name: /Accept Invitation/i }).click();
+
+    await expect(page).toHaveURL(/.*\/org-dashboard/);
   });
 
   test('Create listing', async ({ onboardedSellerPage }) => {
@@ -70,7 +129,7 @@ test.describe('Critical User Flows', () => {
   test('Order', async ({ onboardedBuyerPage, sellerWithProducePage }) => {
     test.setTimeout(60_000);
 
-    const page = onboardedBuyerPage;
+    const { page } = onboardedBuyerPage;
     const { produceId } = sellerWithProducePage;
     
     await page.goto(`/produce/${produceId}`);
@@ -110,7 +169,7 @@ test.describe('Critical User Flows', () => {
   test('Subscribe', async ({ onboardedBuyerPage, sellerWithProducePage }) => {
     test.setTimeout(60_000);
 
-    const page = onboardedBuyerPage;
+    const { page } = onboardedBuyerPage;
     const { produceId } = sellerWithProducePage;
     
     await page.goto(`/produce/${produceId}`);
