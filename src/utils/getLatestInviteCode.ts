@@ -12,11 +12,14 @@ export async function getLatestInviteCode(
   request: APIRequestContext,
   baseURLApi: string,
   email: string,
-  orgId: string
+  orgId: string,
 ): Promise<string> {
-  const inviteRes = await request.get(`${baseURLApi}/api/testing/get-invite-code`, {
-    params: { email, orgId },
-  });
+  const inviteRes = await request.get(
+    `${baseURLApi}/api/testing/get-invite-code`,
+    {
+      params: { email, orgId },
+    },
+  );
   expect(inviteRes.ok()).toBeTruthy();
 
   const body = await inviteRes.json();

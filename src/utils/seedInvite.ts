@@ -7,10 +7,17 @@ import { APIRequestContext, expect } from "@playwright/test";
 export async function seedInvite(
   request: APIRequestContext,
   baseURLApi: string,
-  payload: { email: string; orgId: string; role?: 'member' | 'admin' }
-): Promise<{ id: string; email: string; orgId: string; code: string; role: string; expiresAt: string }> {
+  payload: { email: string; orgId: string; role?: "member" | "admin" },
+): Promise<{
+  id: string;
+  email: string;
+  orgId: string;
+  code: string;
+  role: string;
+  expiresAt: string;
+}> {
   const res = await request.post(`${baseURLApi}/api/testing/seed-invite`, {
-    data: payload
+    data: payload,
   });
   expect(res.ok()).toBeTruthy();
 

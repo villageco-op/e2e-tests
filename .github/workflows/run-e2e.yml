@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.59.1-noble
-    
+
     env:
       PLAYWRIGHT_TEST_BASE_URL: ${{ secrets.TEST_BASE_URL }}
       STAGING_API_URL: ${{ secrets.STAGING_API_URL }}
@@ -19,6 +19,7 @@ jobs:
       NEON_ROLE_PASSWORD: ${{ secrets.NEON_ROLE_PASSWORD }}
       NEON_DB_USER: ${{ secrets.NEON_DB_USER }}
       NEON_DB_NAME: ${{ secrets.NEON_DB_NAME }}
+      NEON_PARENT_BRANCH_ID: ${{ secrets.NEON_PARENT_BRANCH_ID }}
       STRIPE_TEST_SECRET_KEY: ${{ secrets.STRIPE_TEST_SECRET_KEY }}
       E2E_RUN_ID: ${{ github.run_id }}
 
@@ -32,24 +33,24 @@ jobs:
           version: 10
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          cache: 'pnpm'
+          node-version: "22"
+          cache: "pnpm"
       - run: pnpm install --frozen-lockfile
 
       - name: Create Neon Branch
         id: neon
         run: |
           BRANCH_NAME="e2e-run-${{ github.run_id }}"
-          
+
           RESPONSE=$(curl -s -X POST "https://console.neon.tech/api/v2/projects/${NEON_PROJECT_ID}/branches" \
             -H "Authorization: Bearer ${NEON_API_KEY}" \
             -H "Content-Type: application/json" \
             -d '{"branch": {"name": "'$BRANCH_NAME'"}, "endpoints": [{"type": "read_write"}]}')
-          
+
           BRANCH_ID=$(echo $RESPONSE | jq -r '.branch.id')
           DB_HOST=$(echo $RESPONSE | jq -r '.endpoints[0].host')
           DB_URL="postgresql://${NEON_DB_USER}:${NEON_ROLE_PASSWORD}@${DB_HOST}/${NEON_DB_NAME}?sslmode=require"
-          
+
           echo "branch_id=$BRANCH_ID" >> $GITHUB_OUTPUT
           echo "E2E_NEON_DB_URL=$DB_URL" >> $GITHUB_ENV
 
