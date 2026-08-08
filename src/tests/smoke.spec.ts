@@ -4,7 +4,7 @@ test.describe("App Smoke Test", () => {
   test("should_load_the_homepage_successfully", async ({ page }) => {
     await page.goto("/");
 
-    const mainHeading = page.locator("h1");
+    const mainHeading = (await page.locator("h1").all())[0];
     await expect(mainHeading).toBeVisible();
   });
 

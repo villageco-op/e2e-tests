@@ -39,20 +39,7 @@ jobs:
 
       - name: Create Neon Branch
         id: neon
-        run: |
-          BRANCH_NAME="e2e-run-${{ github.run_id }}"
-
-          RESPONSE=$(curl -s -X POST "https://console.neon.tech/api/v2/projects/${NEON_PROJECT_ID}/branches" \
-            -H "Authorization: Bearer ${NEON_API_KEY}" \
-            -H "Content-Type: application/json" \
-            -d '{"branch": {"name": "'$BRANCH_NAME'"}, "endpoints": [{"type": "read_write"}]}')
-
-          BRANCH_ID=$(echo $RESPONSE | jq -r '.branch.id')
-          DB_HOST=$(echo $RESPONSE | jq -r '.endpoints[0].host')
-          DB_URL="postgresql://${NEON_DB_USER}:${NEON_ROLE_PASSWORD}@${DB_HOST}/${NEON_DB_NAME}?sslmode=require"
-
-          echo "branch_id=$BRANCH_ID" >> $GITHUB_OUTPUT
-          echo "E2E_NEON_DB_URL=$DB_URL" >> $GITHUB_ENV
+        run: node ./scripts/create-neon-branch.js
 
       - name: Run Playwright Tests
         run: pnpm test
@@ -67,10 +54,7 @@ jobs:
 
       - name: Delete Neon Branch
         if: always()
-        run: |
-          curl -s -X DELETE "https://console.neon.tech/api/v2/projects/${NEON_PROJECT_ID}/branches/${{ steps.neon.outputs.branch_id }}" \
-            -H "Authorization: Bearer ${NEON_API_KEY}"
-          echo "Deleted Neon Branch: ${{ steps.neon.outputs.branch_id }}"
+        run: node ./scripts/delete-neon-branch.js "${{ steps.neon.outputs.branch_id }}"
 
       - name: Cleanup Stripe Customers
         if: always()
