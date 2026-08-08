@@ -7,10 +7,20 @@ const authFile = path.resolve(
   "../../playwright/.auth/staging-state.json",
 );
 
-setup("Unlock staging environment", async ({ request }) => {
+setup("Unlock staging environment", async ({ request, baseURL }) => {
+  const targetBaseUrl = baseURL || process.env.PLAYWRIGHT_TEST_BASE_URL;
+
+  if (!targetBaseUrl) {
+    throw new Error(
+      "PLAYWRIGHT_TEST_BASE_URL or use.baseURL is not configured.",
+    );
+  }
+
   fs.mkdirSync(path.dirname(authFile), { recursive: true });
 
-  const response = await request.get("/api/staging-unlock", {
+  const unlockUrl = new URL("/api/staging-unlock", targetBaseUrl).toString();
+
+  const response = await request.get(unlockUrl, {
     headers: {
       "x-vercel-protection-bypass": process.env.VERCEL_BYPASS_TOKEN!,
     },
@@ -18,7 +28,7 @@ setup("Unlock staging environment", async ({ request }) => {
 
   console.log("URL:", response.url());
   console.log("Status:", response.status());
-  console.log("Headers:", await response.headers());
+  console.log("Headers:", response.headers());
   console.log("Body:", await response.text());
 
   if (!response.ok()) {

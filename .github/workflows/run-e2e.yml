@@ -11,7 +11,7 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.59.1-noble
 
     env:
-      PLAYWRIGHT_TEST_BASE_URL: ${{ secrets.TEST_BASE_URL }}
+      PLAYWRIGHT_TEST_BASE_URL: ${{ secrets.PLAYWRIGHT_TEST_BASE_URL }}
       STAGING_API_URL: ${{ secrets.STAGING_API_URL }}
       VERCEL_BYPASS_TOKEN: ${{ secrets.VERCEL_BYPASS_TOKEN }}
       NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
