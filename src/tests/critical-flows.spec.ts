@@ -72,6 +72,13 @@ test.describe("Critical User Flows", () => {
     await page.getByLabel(/Street Address/i).fill("401 Broadway");
     await page.getByLabel(/ZIP Code/i).fill("46402");
 
+    const orgCityInput = page.getByLabel(/City/i);
+    await orgCityInput.clear();
+    await orgCityInput.fill("Austin");
+
+    await page.getByRole("combobox").click();
+    await page.getByRole("option", { name: "Texas" }).click();
+
     await expect(page.getByText(/Subdomain is available!/i)).toBeVisible();
 
     await page.getByRole("button", { name: /Create Organization/i }).click();
