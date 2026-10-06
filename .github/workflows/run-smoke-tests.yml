@@ -14,6 +14,26 @@ jobs:
       PLAYWRIGHT_TEST_BASE_URL: ${{ github.event.client_payload.target_url }}
 
     steps:
+      - name: Generate GitHub App Token
+        id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.E2E_APP_ID }}
+          private-key: ${{ secrets.E2E_APP_PRIVATE_KEY }}
+          owner: villageco-op
+          repositories: ${{ github.event.client_payload.repo }}
+
+      - name: Set Pending Status on PR
+        uses: myrotvorets/set-commit-status-action@v2.0.1
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          repo: ${{ github.event.client_payload.repo }}
+          sha: ${{ github.event.client_payload.sha }}
+          context: "Frontend Smoke Tests (Playwright)"
+          status: "pending"
+          description: "Running smoke tests on Vercel preview deployment..."
+          targetUrl: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
       - name: Checkout E2E Tests Code
         uses: actions/checkout@v4
 
@@ -37,3 +57,27 @@ jobs:
           name: playwright-smoke-report
           path: playwright-report/
           retention-days: 7
+
+      - name: Report Success
+        if: success()
+        uses: myrotvorets/set-commit-status-action@v2.0.1
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          repo: ${{ github.event.client_payload.repo }}
+          sha: ${{ github.event.client_payload.sha }}
+          context: "Frontend Smoke Tests (Playwright)"
+          status: "success"
+          description: "All smoke tests passed!"
+          targetUrl: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+      - name: Report Failure
+        if: failure()
+        uses: myrotvorets/set-commit-status-action@v2.0.1
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          repo: ${{ github.event.client_payload.repo }}
+          sha: ${{ github.event.client_payload.sha }}
+          context: "Frontend Smoke Tests (Playwright)"
+          status: "failure"
+          description: "Smoke tests failed on preview URL."
+          targetUrl: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
