@@ -23,7 +23,7 @@ jobs:
       STRIPE_TEST_SECRET_KEY: ${{ secrets.STRIPE_TEST_SECRET_KEY }}
       E2E_RUN_ID: ${{ github.run_id }}
 
-    - name: Extract Repository Name
+      - name: Extract Repository Name
         id: repo_name
         run: |
           FULL_REPO="${{ github.event.client_payload.repo }}"
