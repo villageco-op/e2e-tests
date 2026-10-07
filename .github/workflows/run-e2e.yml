@@ -28,7 +28,7 @@ jobs:
         run: |
           FULL_REPO="${{ github.event.client_payload.repo }}"
           REPO_NAME="${FULL_REPO##*/}"
-          echo "name=$REPO_NAME" >> $GITHUB_OUTPUT
+          echo "name=${REPO_NAME}" >> "$GITHUB_OUTPUT"
 
       - name: Generate GitHub App Token
         id: generate_token
