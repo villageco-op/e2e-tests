@@ -22,7 +22,8 @@ jobs:
       NEON_PARENT_BRANCH_ID: ${{ secrets.NEON_PARENT_BRANCH_ID }}
       STRIPE_TEST_SECRET_KEY: ${{ secrets.STRIPE_TEST_SECRET_KEY }}
       E2E_RUN_ID: ${{ github.run_id }}
-
+    
+    steps:
       - name: Extract Repository Name
         id: repo_name
         run: |
