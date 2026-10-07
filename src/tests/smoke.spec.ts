@@ -36,7 +36,7 @@ test.describe("App Smoke Test", () => {
   test("buyer browse page should load successfully", async ({ page }) => {
     await page.goto("/buyer/browse");
     await expect(
-      page.getByRole("heading", { name: "Browse Produce" }),
+      page.getByPlaceholder("Search items or growers..."),
     ).toBeVisible();
   });
 

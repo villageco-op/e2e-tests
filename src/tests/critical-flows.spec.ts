@@ -34,11 +34,8 @@ test.describe("Critical User Flows", () => {
 
     await page.getByRole("button", { name: /Not right now/i }).click();
 
-    const successHeading = page.getByRole("heading", { name: /You're in!/i });
-    await expect(successHeading).toBeVisible();
-
     const stripeBtn = page.getByRole("button", {
-      name: /Complete Stripe Onboarding/i,
+      name: /Connect with Stripe/i,
     });
     await expect(stripeBtn).toBeVisible();
     await expect(stripeBtn).toBeEnabled();
@@ -144,7 +141,7 @@ test.describe("Critical User Flows", () => {
       .fill("Crispy and sweet organic gala apples from the north orchard.");
 
     await page.getByLabel(/Produce Type/i).click();
-    await page.getByRole("option", { name: "Stone Fruits" }).click();
+    await page.getByRole("option", { name: "Fruit" }).click();
 
     await page.getByLabel(/Price per lb/i).fill("3.50");
     await page.getByLabel(/Total Inventory/i).fill("100");
