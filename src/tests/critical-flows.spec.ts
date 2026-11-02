@@ -143,7 +143,7 @@ test.describe("Critical User Flows", () => {
     await page.getByLabel(/Produce Type/i).click();
     await page.getByRole("option", { name: "Fruit" }).click();
 
-    await page.getByLabel(/Price per lb/i).fill("3.50");
+    await page.getByLabel(/Price per oz/i).fill("3.50");
     await page.getByLabel(/Total Inventory/i).fill("100");
 
     await page.getByLabel(/Available By/i).fill("2026-05-01T10:00");

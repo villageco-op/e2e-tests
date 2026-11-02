@@ -16,7 +16,6 @@ export async function createAuthenticatedPage(
     { data: { email } },
   );
 
-  console.log(`Login response: ${JSON.stringify(loginResponse)}`);
   const cookiesHeader = loginResponse.headers()["set-cookie"];
 
   const context = await browser.newContext();

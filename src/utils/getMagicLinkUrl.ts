@@ -16,7 +16,6 @@ export async function getMagicLinkUrl(
   const tokenRes = await request.get(`${baseURLApi}/api/testing`, {
     params: { email },
   });
-  console.log(`Token response: ${JSON.stringify(tokenRes)}`);
   expect(tokenRes.ok()).toBeTruthy();
 
   const tokenData = await tokenRes.json();
