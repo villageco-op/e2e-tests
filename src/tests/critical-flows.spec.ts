@@ -169,7 +169,7 @@ test.describe("Critical User Flows", () => {
     const { page } = onboardedBuyerPage;
     const { produceId } = sellerWithProducePage;
 
-    await page.goto(`/produce/${produceId}`);
+    await page.goto(`/listings/${produceId}`);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
     await page.getByRole("button", { name: /Order Now/i }).click();
@@ -214,7 +214,7 @@ test.describe("Critical User Flows", () => {
     const { page } = onboardedBuyerPage;
     const { produceId } = sellerWithProducePage;
 
-    await page.goto(`/produce/${produceId}`);
+    await page.goto(`/listings/${produceId}`);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
     await page.getByRole("button", { name: /Order Now/i }).click();
