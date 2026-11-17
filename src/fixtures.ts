@@ -37,6 +37,13 @@ export type MyTestOptions = {
     subscriptionId: string;
     seedSubscription: (override?: Record<string, any>) => Promise<{ id: string }>;
   };
+  sellerWithOrder: {
+    page: Page;
+    buyerEmail: string;
+    sellerEmail: string;
+    orderId: string;
+    seedOrder: (override?: Record<string, any>) => Promise<{ id: string }>;
+  };
 };
 
 export const test = base.extend<MyTestOptions>({
@@ -347,6 +354,52 @@ export const test = base.extend<MyTestOptions>({
       sellerEmail,
       subscriptionId: initialSub.id,
       seedSubscription,
+    });
+  },
+
+  sellerWithOrder: async (
+    { onboardedSellerPage, onboardedBuyerPage, sellerWithProducePage, request, baseURLApi },
+    use,
+  ) => {
+    const { page, email: sellerEmail } = onboardedSellerPage;
+    const { email: buyerEmail } = onboardedBuyerPage;
+    const { produceId } = sellerWithProducePage;
+
+    const seedOrder = async (overrides = {}) => {
+      const res = await request.post(`${baseURLApi}/api/testing/seed-order`, {
+        data: {
+          buyerEmail,
+          sellerEmail,
+          produceId,
+          status: "paid",
+          quantityOz: 16,
+          totalPrice: 12.0,
+          fulfillmentType: "delivery",
+          scheduledDate: new Date().toISOString(),
+          ...overrides,
+        },
+      });
+      const data = await res.json();
+      const order = data.order;
+
+      await expect.poll(async () => {
+        const checkRes = await request.get(`${baseURLApi}/api/orders/${order.id}`);
+        return checkRes.status();
+      }, {
+        timeout: 10_000,
+        intervals: [100, 250, 500],
+      }).toBe(200);
+
+      return order;
+    };
+
+    const initialOrder = await seedOrder();
+    await use({
+      page,
+      buyerEmail,
+      sellerEmail,
+      orderId: initialOrder.id,
+      seedOrder,
     });
   },
 });

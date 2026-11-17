@@ -26,11 +26,6 @@ setup("Unlock staging environment", async ({ request, baseURL }) => {
     },
   });
 
-  console.log("URL:", response.url());
-  console.log("Status:", response.status());
-  console.log("Headers:", response.headers());
-  console.log("Body:", await response.text());
-
   if (!response.ok()) {
     throw new Error(
       `Failed to unlock staging: ${response.status()} ${response.statusText()}`,
