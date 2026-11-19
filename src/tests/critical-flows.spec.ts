@@ -154,7 +154,7 @@ test.describe("Critical User Flows", () => {
       .getByLabel(/Allow customers to set up recurring orders/i)
       .check();
 
-    const publishBtn = page.getByRole("button", { name: /Publish Listing/i });
+    const publishBtn = page.getByRole("button", { name: /Publish/i });
     await publishBtn.click();
 
     await expect(page.getByText(/Listing created successfully/i)).toBeVisible();

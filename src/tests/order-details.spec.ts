@@ -87,6 +87,10 @@ test.describe("Order Details Page", () => {
     });
 
     await page.goto(`/orders/${order.id}`);
+    
+    // Close order completion popup
+    const remindLaterBtn = page.getByRole("button", { name: /Remind me later/i });
+    await remindLaterBtn.click();
 
     const reportReceivedBtn = page.getByRole("button", { name: /Report Received/i });
     await expect(reportReceivedBtn).toBeVisible();
@@ -108,6 +112,10 @@ test.describe("Order Details Page", () => {
     });
 
     await page.goto(`/orders/${order.id}`);
+    
+    // Close order completion popup
+    const remindLaterBtn = page.getByRole("button", { name: /Remind me later/i });
+    await remindLaterBtn.click();
 
     const reportNotReceivedBtn = page.getByRole("button", { name: /Report Not Received/i });
     await expect(reportNotReceivedBtn).toBeVisible();
@@ -129,6 +137,10 @@ test.describe("Order Details Page", () => {
     });
 
     await page.goto(`/orders/${order.id}`);
+
+    // Close order completion popup
+    const remindLaterBtn = page.getByRole("button", { name: /Remind me later/i });
+    await remindLaterBtn.click();
 
     const reportFulfilledBtn = page.getByRole("button", { name: /Report Fulfilled/i });
     await expect(reportFulfilledBtn).toBeVisible();
