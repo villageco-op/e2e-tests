@@ -1,6 +1,7 @@
 import { expect } from "@playwright/test";
 import { test } from "../fixtures";
 import { seedInvite } from "@/utils/seedInvite";
+import { fillStripeCheckout } from "@/utils/fillStripeCheckout";
 
 test.describe("Critical User Flows", () => {
   test("Create account + onboarding", async ({ newUnonboardedPage }) => {
@@ -189,18 +190,15 @@ test.describe("Critical User Flows", () => {
     await expect(checkoutBtn).toBeVisible();
     await checkoutBtn.click();
 
-    await page.waitForURL(/.*stripe.com.*/);
-
-    await page.locator("#email").fill(`buyer-test-${Date.now()}@example.com`);
-    await page.locator("#cardNumber").fill("4242");
-    await page.locator("#cardNumber").pressSequentially("4242424242424242");
-    await page.locator("#cardExpiry").fill("12/28");
-    await page.locator("#cardCvc").fill("123");
-    await page.locator("#billingName").fill("John Buyer");
-    await page.locator("#billingPostalCode").fill("90210");
-    await page.locator("#phoneNumber").fill("2025550143");
-
-    await page.getByTestId("hosted-payment-submit-button").click();
+    await fillStripeCheckout(page, {
+      email: `buyer-test-${Date.now()}@example.com`,
+      cardNumber: "4242424242424242",
+      expiry: "12/28",
+      cvc: "123",
+      name: "John Buyer",
+      postalCode: "90210",
+      phoneNumber: "2025550143",
+    });
 
     await page.waitForURL(/.*\/checkout\/success*/);
     await expect(
@@ -234,20 +232,15 @@ test.describe("Critical User Flows", () => {
     await expect(checkoutBtn).toBeVisible();
     await checkoutBtn.click();
 
-    await page.waitForURL(/.*stripe.com.*/);
-
-    await page
-      .locator("#email")
-      .fill(`subscriber-test-${Date.now()}@example.com`);
-    await page.locator("#cardNumber").fill("4242");
-    await page.locator("#cardNumber").pressSequentially("4242424242424242");
-    await page.locator("#cardExpiry").fill("12/28");
-    await page.locator("#cardCvc").fill("123");
-    await page.locator("#billingName").fill("Jane Subscriber");
-    await page.locator("#billingPostalCode").fill("90210");
-    await page.locator("#phoneNumber").fill("2025550143");
-
-    await page.getByTestId("hosted-payment-submit-button").click();
+    await fillStripeCheckout(page, {
+      email: `subscriber-test-${Date.now()}@example.com`,
+      cardNumber: "4242424242424242",
+      expiry: "12/28",
+      cvc: "123",
+      name: "Jane Subscriber",
+      postalCode: "90210",
+      phoneNumber: "2025550143",
+    });
 
     await page.waitForURL(/.*\/checkout\/success*/);
     await expect(
