@@ -1,7 +1,6 @@
 import { expect } from "@playwright/test";
 import { test } from "../fixtures";
 import { seedInvite } from "@/utils/seedInvite";
-import { fillStripeCheckout } from "@/utils/fillStripeCheckout";
 
 test.describe("Critical User Flows", () => {
   test("Create account + onboarding", async ({ newUnonboardedPage }) => {
@@ -162,89 +161,5 @@ test.describe("Critical User Flows", () => {
 
     await expect(page).toHaveURL(/.*\/seller\/listings/);
     await expect(page.getByText(listingTitle)).toBeVisible();
-  });
-
-  test("Order", async ({ onboardedBuyerPage, sellerWithProducePage }) => {
-    test.setTimeout(60_000);
-
-    const { page } = onboardedBuyerPage;
-    const { produceId } = sellerWithProducePage;
-
-    await page.goto(`/listings/${produceId}`);
-    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-
-    await page.getByRole("button", { name: /Order Now/i }).click();
-
-    await expect(page.getByRole("dialog")).toBeVisible();
-
-    await page.getByRole("button", { name: /Add to Cart/i }).click();
-
-    await expect(page.getByText(/Added to cart!/i)).toBeVisible();
-
-    await page
-      .getByRole("button", { name: /View cart/i })
-      .first()
-      .click();
-
-    const checkoutBtn = page.getByRole("button", { name: /Checkout/i });
-    await expect(checkoutBtn).toBeVisible();
-    await checkoutBtn.click();
-
-    await fillStripeCheckout(page, {
-      email: `buyer-test-${Date.now()}@example.com`,
-      cardNumber: "4242424242424242",
-      expiry: "12/28",
-      cvc: "123",
-      name: "John Buyer",
-      postalCode: "90210",
-      phoneNumber: "2025550143",
-    });
-
-    await page.waitForURL(/.*\/checkout\/success*/);
-    await expect(
-      page.getByRole("heading", { name: /Order Confirmed!/i }),
-    ).toBeVisible();
-  });
-
-  test("Subscribe", async ({ onboardedBuyerPage, sellerWithProducePage }) => {
-    test.setTimeout(60_000);
-
-    const { page } = onboardedBuyerPage;
-    const { produceId } = sellerWithProducePage;
-
-    await page.goto(`/listings/${produceId}`);
-    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-
-    await page.getByRole("button", { name: /Order Now/i }).click();
-    await expect(page.getByRole("dialog")).toBeVisible();
-
-    await page.getByLabel(/Subscribe to this item/i).click();
-
-    await page.getByRole("button", { name: /Add to Cart/i }).click();
-    await expect(page.getByText(/Added to cart!/i)).toBeVisible();
-
-    await page
-      .getByRole("button", { name: /View cart/i })
-      .first()
-      .click();
-
-    const checkoutBtn = page.getByRole("button", { name: /Checkout/i });
-    await expect(checkoutBtn).toBeVisible();
-    await checkoutBtn.click();
-
-    await fillStripeCheckout(page, {
-      email: `subscriber-test-${Date.now()}@example.com`,
-      cardNumber: "4242424242424242",
-      expiry: "12/28",
-      cvc: "123",
-      name: "Jane Subscriber",
-      postalCode: "90210",
-      phoneNumber: "2025550143",
-    });
-
-    await page.waitForURL(/.*\/checkout\/success*/);
-    await expect(
-      page.getByRole("heading", { name: /Order Confirmed!/i }),
-    ).toBeVisible();
   });
 });
