@@ -4,7 +4,7 @@ test.describe("Edit Listing Page", () => {
   test("updates listing details successfully", async ({ sellerWithProducePage }) => {
     const { page, produceId } = sellerWithProducePage;
 
-    await page.goto(`/seller/listings/${produceId}/edit`);
+    await page.goto(`/sell/listings/${produceId}/edit`);
 
     const titleInput = page.getByLabel(/Title/i);
     await expect(titleInput).toBeVisible();
@@ -21,13 +21,13 @@ test.describe("Edit Listing Page", () => {
     await saveBtn.click();
 
     await expect(page.getByText(/Listing updated successfully/i)).toBeVisible();
-    await page.waitForURL(/.*\/seller\/listings.*/);
+    await page.waitForURL(/.*\/sell\/listings.*/);
   });
 
   test("pauses and resumes a listing from the danger zone", async ({ sellerWithProducePage }) => {
     const { page, produceId } = sellerWithProducePage;
 
-    await page.goto(`/seller/listings/${produceId}/edit`);
+    await page.goto(`/sell/listings/${produceId}/edit`);
 
     const pauseBtn = page.getByRole("button", { name: /Pause Listing/i });
     await expect(pauseBtn).toBeVisible();
@@ -49,7 +49,7 @@ test.describe("Edit Listing Page", () => {
   test("deletes a listing with confirmation", async ({ sellerWithProducePage }) => {
     const { page, produceId } = sellerWithProducePage;
 
-    await page.goto(`/seller/listings/${produceId}/edit`);
+    await page.goto(`/sell/listings/${produceId}/edit`);
 
     const deleteBtn = page.getByRole("button", { name: /Delete Listing/i });
     await expect(deleteBtn).toBeVisible();
@@ -64,6 +64,6 @@ test.describe("Edit Listing Page", () => {
     await confirmDeleteBtn.click();
 
     await expect(page.getByText(/Listing deleted successfully/i)).toBeVisible();
-    await page.waitForURL(/.*\/seller\/listings.*/);
+    await page.waitForURL(/.*\/sell\/listings.*/);
   });
 });

@@ -34,16 +34,16 @@ test.describe("App Smoke Test", () => {
   });
 
   test("buyer browse page should load successfully", async ({ page }) => {
-    await page.goto("/buyer/browse");
+    await page.goto("/shop/browse");
     await expect(
       page.getByPlaceholder("Search items or growers..."),
     ).toBeVisible();
   });
 
   test("buyer help page should load successfully", async ({ page }) => {
-    await page.goto("/buyer/help");
+    await page.goto("/shop/help");
     await expect(
-      page.getByRole("heading", { name: "Buyer Support" }),
+      page.getByRole("heading", { name: "Shopping Support" }),
     ).toBeVisible();
     await expect(
       page.getByRole("textbox", { name: "Your Name *" }),
@@ -51,9 +51,9 @@ test.describe("App Smoke Test", () => {
   });
 
   test("become seller page should load successfully", async ({ page }) => {
-    await page.goto("/become-seller");
+    await page.goto("/start-selling");
     await expect(
-      page.getByRole("heading", { name: "Become a Seller & Grower" }),
+      page.getByRole("heading", { name: "Start Selling to Your Community" }),
     ).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Accept Online Payments" }),

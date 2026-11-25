@@ -25,7 +25,7 @@ test.describe("Critical User Flows", () => {
     await page.getByLabel(/ZIP Code/i).fill("78701");
     await page.getByRole("button", { name: /Continue/i }).click();
 
-    await page.getByRole("button", { name: /Seller/i }).click();
+    await page.getByRole("button", { name: /Sell/i }).click();
 
     await page
       .getByLabel(/About You/i)
@@ -133,7 +133,7 @@ test.describe("Critical User Flows", () => {
     const { page } = onboardedSellerPage;
     const listingTitle = `Gala Apples ${Math.floor(Math.random() * 1000)}`;
 
-    await page.goto("/seller/new-listing");
+    await page.goto("/sell/new-listing");
 
     await page.getByLabel(/Title/i).fill(listingTitle);
     await page
@@ -159,7 +159,7 @@ test.describe("Critical User Flows", () => {
 
     await expect(page.getByText(/Listing created successfully/i)).toBeVisible();
 
-    await expect(page).toHaveURL(/.*\/seller\/listings/);
+    await expect(page).toHaveURL(/.*\/sell\/listings/);
     await expect(page.getByText(listingTitle)).toBeVisible();
   });
 });
